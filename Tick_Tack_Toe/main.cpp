@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Game.h"
 #include "Player.h"
+#include <conio.h>
 
 int main()
 {
@@ -12,10 +13,18 @@ int main()
 	game.print();
 	while (game.playing())
 	{
-		p1.make_turn(game);
-		game.print();
-		p2.make_turn(game);
-		game.print();
+		if (p1.make_turn(game))
+		{
+			game.print();
+			std::cout << "WOW PLAYER 1 WIN!!!" << std::endl;
+		}
+		else if (p2.make_turn(game))
+		{
+			game.print();
+			std::cout << "WOW PLAYER 2 WIN!!!" << std::endl;
+		} else game.print();
 	}
+
+	_getch();
 	return 0;
 }

@@ -28,6 +28,7 @@ private:
 	size_t _size;
 	//???
 	bool _playing;
+	size_t _win_points;
 };
 
 #endif // !GAME_H

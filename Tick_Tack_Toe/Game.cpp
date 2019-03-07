@@ -4,6 +4,7 @@
 Game::Game(size_t n)
 {
 	_playing = true;
+	_win_points = 3;
 
 	//by task
 	_size = n;
