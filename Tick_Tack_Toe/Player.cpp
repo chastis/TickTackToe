@@ -1,6 +1,8 @@
 #include "Player.h"
 #include <iostream>
 
+#define CELL_SIZE 160
+
 Player::Player()
 {
 
@@ -19,81 +21,125 @@ Player::~Player()
 
 bool Player::am_i_win( Game &game, size_t x, size_t y)
 {
-	size_t temp_x = x, temp_y = y;
-	size_t points = 1;
+	
+	auto vertical_check = [&](bool recolor = false)
+	{
+		size_t temp_x = x, temp_y = y;
+		size_t points = 1;
+		if (recolor) game._field[temp_x][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+
+		while (temp_x + 1 < game._size && game._field[temp_x + 1][temp_y] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x + 1][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_x++;
+		}
+		temp_x = x;
+		temp_y = y;
+		while (temp_x != 0 && game._field[temp_x - 1][temp_y] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x - 1][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_x--;
+		}
+
+		return points;
+	};
+	auto horizontal_check = [&](bool recolor = false)
+	{
+		size_t temp_x = x, temp_y = y;
+		size_t points = 1;
+		if (recolor) game._field[temp_x][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+		while (temp_y + 1 < game._size && game._field[temp_x][temp_y + 1] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x][temp_y + 1] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_y++;
+		}
+		temp_x = x;
+		temp_y = y;
+		while (temp_y != 0 && game._field[temp_x][temp_y - 1] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x][temp_y - 1] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_y--;
+		}
+		return points;
+	};
+	auto from_bottom_left_to_top_right_check = [&](bool recolor = false)
+	{
+		size_t temp_x = x, temp_y = y;
+		size_t points = 1;
+		if (recolor) game._field[temp_x][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+		while (temp_y + 1 < game._size && temp_x + 1 < game._size && game._field[temp_x + 1][temp_y + 1] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x + 1][temp_y + 1] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_y++;
+			temp_x++;
+		}
+		temp_x = x;
+		temp_y = y;
+		while (temp_y != 0 && temp_x != 0 && game._field[temp_x - 1][temp_y - 1] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x - 1][temp_y - 1] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_y--;
+			temp_x--;
+		}
+		return points;
+	};
+	auto from_bottom_right_to_top_left_check = [&](bool recolor = false)
+	{
+		size_t temp_x = x, temp_y = y;
+		size_t points = 1;
+		if (recolor) game._field[temp_x][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+		while (temp_y + 1 < game._size && temp_x != 0 && game._field[temp_x - 1][temp_y + 1] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x - 1][temp_y + 1] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_y++;
+			temp_x--;
+		}
+		temp_x = x;
+		temp_y = y;
+		while (temp_y != 0 && temp_x + 1 < game._size && game._field[temp_x + 1][temp_y - 1] == this->_my_cell)
+		{
+			if (recolor) game._field[temp_x + 1][temp_y - 1] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
+			points++;
+			temp_y--;
+			temp_x++;
+		}
+		return points;
+	};
 	//vertical
-	while (temp_x + 1 < game._size && game._field[temp_x + 1][temp_y] == this->_my_cell)
+	if (vertical_check() >= game._win_points)
 	{
-		points++;
-		temp_x++;
+		vertical_check(true);
+		game._playing = false;
+		return true;
 	}
-	temp_x = x;
-	temp_y = y;
-	while (temp_x !=0 && game._field[temp_x - 1][temp_y] == this->_my_cell)
-	{
-		points++;
-		temp_x--;
-	}
-	if (points >= game._win_points) {
-		game._playing = false; return true; }
 	//horisontal
-	temp_x = x;
-	temp_y = y;
-	points = 1;
-	while (temp_y + 1 < game._size && game._field[temp_x][temp_y + 1] == this->_my_cell)
+	if (horizontal_check() >= game._win_points)
 	{
-		points++;
-		temp_y++;
+		horizontal_check(true);
+		game._playing = false;
+		return true;
 	}
-	temp_x = x;
-	temp_y = y;
-	while (temp_y != 0 && game._field[temp_x][temp_y - 1] == this->_my_cell)
-	{
-		points++;
-		temp_y--;
-	}
-	if (points >= game._win_points) {
-		game._playing = false; return true; }
 	//from bottom left to top right
-	temp_x = x;
-	temp_y = y;
-	points = 1;
-	while (temp_y + 1 < game._size && temp_x + 1 < game._size && game._field[temp_x + 1][temp_y + 1] == this->_my_cell)
+	if (from_bottom_left_to_top_right_check() >= game._win_points)
 	{
-		points++;
-		temp_y++;
-		temp_x++;
+		from_bottom_left_to_top_right_check(true);
+		game._playing = false;
+		return true;
 	}
-	temp_x = x;
-	temp_y = y;
-	while (temp_y != 0 && temp_x != 0 && game._field[temp_x - 1][temp_y - 1] == this->_my_cell)
-	{
-		points++;
-		temp_y--;
-		temp_x--;
-	}
-	if (points >= game._win_points) {
-		game._playing = false; return true; }
 	//fron bottom right to top left
-	temp_x = x;
-	temp_y = y;
-	points = 1;
-	while (temp_y + 1 < game._size && temp_x != 0 && game._field[temp_x - 1][temp_y + 1] == this->_my_cell)
+	if (from_bottom_right_to_top_left_check() >= game._win_points)
 	{
-		points++;
-		temp_y++;
-		temp_x--;
+		from_bottom_right_to_top_left_check(true);
+		game._playing = false;
+		return true;
 	}
-	temp_x = x;
-	temp_y = y;
-	while (temp_y != 0 && temp_x + 1 < game._size && game._field[temp_x + 1][temp_y - 1] == this->_my_cell)
-	{
-		points++;
-		temp_y--;
-		temp_x++;
-	}
-	if (points >= game._win_points) {
-		game._playing = false; return true; }
 
 	return false;
 }
@@ -101,9 +147,9 @@ bool Player::am_i_win( Game &game, size_t x, size_t y)
 bool Player::make_turn(Game &game, sf::Vector2f pos)
 {
 	//check that we are on the field
-	if (pos.x < 0 || pos.y < 0 || pos.x > 32 * game._size - 1 || pos.y > 32 * game._size - 1) return false;
+	if (pos.x < 0 || pos.y < 0 || pos.x > CELL_SIZE * game.x_scale * game._size - 1 || pos.y > CELL_SIZE * game.y_scale * game._size - 1) return false;
 	//transorm to matrix iterators
-	size_t x = pos.x / 32, y = pos.y / 32;
+	size_t x = pos.x / (CELL_SIZE * game.x_scale), y = pos.y / (CELL_SIZE * game.y_scale);
 	//check for empty cell
 	if (game._field[x][y] != cell::empty) return false;
 	//next pl turn

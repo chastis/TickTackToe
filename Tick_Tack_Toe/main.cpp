@@ -1,9 +1,10 @@
-#include <iostream>
+﻿#include <iostream>
 #include <conio.h>
 #include <SFML\Graphics.hpp>
 #include "Game.h"
 #include "Player.h"
 #include "Menu.h"
+#include "Message.h"
 
 int main()
 {
@@ -11,6 +12,8 @@ int main()
 
 	Game game;
 	Menu menu;
+	Message msg;
+
 	Player p1(1, cell::x);
 	Player p2(1, cell::o);
 	bool first_p_turn = true;
@@ -69,11 +72,11 @@ int main()
 					{
 						if (game.will_first_go())
 						{
-							if (p1.make_turn(game, pos)) std::cout << "Player 1 have won!" << std::endl;
+							if (p1.make_turn(game, pos)) msg.x_won = true;
 						}
 						else
 						{
-							if (p2.make_turn(game, pos)) std::cout << "Player 2 have won!" << std::endl;
+							if (p2.make_turn(game, pos)) msg.o_won = true;
 						}
 						game.print();
 					}
@@ -82,7 +85,19 @@ int main()
 		}
 		
 		window.clear();
-		if (menu.is_menu()) menu.draw(window,game); else game.draw(window);
+		if (menu.is_menu())
+		{
+			msg.x_won = false;
+			msg.o_won = false;
+			menu.draw(window, game);
+
+		}
+		else game.draw(window);
+		if (!menu.is_menu())
+		{
+			if (msg.x_won) msg.draw_x_won(window);
+			if (msg.o_won) msg.draw_o_won(window);
+		}
 		window.display();
 	}
 	//_getch();

@@ -18,7 +18,7 @@ public:
 	void draw(sf::RenderWindow &window);
 	void print_pos();
 	bool is_shine();
-private:
+protected:
 	void change_color();
 	void shine_color();
 	void return_color();

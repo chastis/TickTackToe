@@ -5,7 +5,7 @@
 //content of cell in the field
 enum class cell
 {
-	x, o, empty
+	x, o, empty, win_x, win_o
 };
 
 
@@ -40,6 +40,9 @@ private:
 	//will first player go?
 	bool _first_p_turn;
 
+	//scale's param
+	float x_scale;
+	float y_scale;
 	//sfml staff
 	sf::Texture _texture;
 	sf::Sprite _sprite;
