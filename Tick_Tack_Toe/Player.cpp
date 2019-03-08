@@ -16,6 +16,7 @@ Player::~Player()
 {
 
 }
+
 bool Player::am_i_win( Game &game, size_t x, size_t y)
 {
 	size_t temp_x = x, temp_y = y;
@@ -26,6 +27,8 @@ bool Player::am_i_win( Game &game, size_t x, size_t y)
 		points++;
 		temp_x++;
 	}
+	temp_x = x;
+	temp_y = y;
 	while (temp_x !=0 && game._field[temp_x - 1][temp_y] == this->_my_cell)
 	{
 		points++;
@@ -42,6 +45,8 @@ bool Player::am_i_win( Game &game, size_t x, size_t y)
 		points++;
 		temp_y++;
 	}
+	temp_x = x;
+	temp_y = y;
 	while (temp_y != 0 && game._field[temp_x][temp_y - 1] == this->_my_cell)
 	{
 		points++;
@@ -59,6 +64,8 @@ bool Player::am_i_win( Game &game, size_t x, size_t y)
 		temp_y++;
 		temp_x++;
 	}
+	temp_x = x;
+	temp_y = y;
 	while (temp_y != 0 && temp_x != 0 && game._field[temp_x - 1][temp_y - 1] == this->_my_cell)
 	{
 		points++;
@@ -77,6 +84,8 @@ bool Player::am_i_win( Game &game, size_t x, size_t y)
 		temp_y++;
 		temp_x--;
 	}
+	temp_x = x;
+	temp_y = y;
 	while (temp_y != 0 && temp_x + 1 < game._size && game._field[temp_x + 1][temp_y - 1] == this->_my_cell)
 	{
 		points++;
@@ -88,6 +97,7 @@ bool Player::am_i_win( Game &game, size_t x, size_t y)
 
 	return false;
 }
+
 bool Player::make_turn(Game &game, sf::Vector2f pos)
 {
 	//check that we are on the field

@@ -13,10 +13,12 @@ class Game
 {
 public:
 	friend class Player;
-
+	friend class Menu;
 	//n is size of the field
-	Game(size_t n = 3);
+	Game(size_t n = 8);
 	~Game();
+
+	void reset();
 	//are we still playing?
 	bool playing();
 	//print to cmd
@@ -30,6 +32,7 @@ private:
 	cell** _field;
 	//width and height of the field
 	size_t _size;
+	size_t _prev_size;
 	//are we still playing?
 	bool _playing;
 	//amount points for win
@@ -38,7 +41,6 @@ private:
 	bool _first_p_turn;
 
 	//sfml staff
-	sf::Image _image;
 	sf::Texture _texture;
 	sf::Sprite _sprite;
 };

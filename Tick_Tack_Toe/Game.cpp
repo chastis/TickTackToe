@@ -7,13 +7,15 @@ Game::Game(size_t n)
 	_win_points = 3;
 	_first_p_turn = true;
 	//sfml staff
-	_image.loadFromFile("xo.png");
-	_texture.loadFromImage(_image);
+	_texture.loadFromFile("images/xo.png");
+	//sglazhivanie
+	_texture.setSmooth(true);
 	_sprite.setTexture(_texture);
 
 
 	//by task
 	_size = n;
+	_prev_size = n;
 	//release memory
 	_field = new cell* [_size];
 	for (size_t i = 0; i < _size; i++)
@@ -29,6 +31,7 @@ Game::Game(size_t n)
 		}
 	}
 }
+
 Game::~Game()
 {
 	//discharge memory
@@ -77,4 +80,35 @@ void Game::draw(sf::RenderWindow &window)
 bool Game::will_first_go()
 {
 	return _first_p_turn;
+}
+
+void Game::reset()
+{
+	_playing = true;
+	_win_points = _size <= 3 ? _size : _size < 8 ? 3 : _size > 11 ? 5 : 4;
+	_first_p_turn = true;
+
+	//discharge prev memory
+	for (size_t i = 0; i < _prev_size; i++)
+	{
+		delete[] _field[i];
+	}
+	delete _field;
+
+	//release memory
+	_field = new cell*[_size];
+	for (size_t i = 0; i < _size; i++)
+	{
+		_field[i] = new cell[_size];
+	}
+	//initialization
+	for (size_t i = 0; i < _size; i++)
+	{
+		for (size_t j = 0; j < _size; j++)
+		{
+			_field[i][j] = cell::empty;
+		}
+	}
+
+	_prev_size = _size;
 }
