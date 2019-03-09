@@ -1,30 +1,26 @@
 ﻿#include "Game.h"
-#include <iostream>
 
+//size of cell in px
 #define CELL_SIZE 160
 
 Game::Game(size_t n)
 {
-	//if (n == 8) std::cout << "Hello there!" << std::endl;
 	_playing = true;
 	_first_p_turn = true;
 	//sfml staff
 	_texture.loadFromFile("images/xo6.png");
-	//sglazhivanie
-	//_texture.setSmooth(true);
 	_sprite.setTexture(_texture);
 
 	//by task
 	_size = n;
+	_turns = _size * _size;
 	_win_points = _size <= 3 ? _size : _size < 8 ? 3 : _size > 11 ? 5 : 4;
 	_prev_size = n;
 
 	//scale's staff
 	x_scale = y_scale = (float) 640 / (_size * CELL_SIZE);
-	//std::cout << x_scale << " " << y_scale << std::endl;
 	_sprite.setScale(x_scale, y_scale);
 
-	
 	//release memory
 	_field = new cell* [_size];
 	for (size_t i = 0; i < _size; i++)
@@ -53,23 +49,9 @@ Game::~Game()
 
 bool Game::playing()
 {
+	//case for "nobody win"
+	if (_turns == 0) return false;
 	return _playing;
-}
-
-void Game::print()
-{
-	for (size_t i = 0; i < _size; i++)
-	{
-		for (size_t j = 0; j < _size; j++)
-		{
-			if (_field[i][j] == cell::empty) std::cout << "*";
-			else if (_field[i][j] == cell::o) std::cout << "o";
-			else if (_field[i][j] == cell::x) std::cout << "x";
-			else if (_field[i][j] == cell::win_x) std::cout << "%";
-			else std::cout << "@";
-		}
-		std::cout << std::endl;
-	}
 }
 
 void Game::draw(sf::RenderWindow &window)
@@ -79,9 +61,15 @@ void Game::draw(sf::RenderWindow &window)
 	{
 		for (size_t j = 0; j < _size; j++)
 		{
+			//cut our textures
 			if (_field[i][j] == cell::empty) _sprite.setTextureRect(sf::IntRect(2 * CELL_SIZE, 0, CELL_SIZE, CELL_SIZE));
+
+			//!!
 			//la béquille
 			// there are some truble with scale
+			//this make picture more fancy
+			//!!
+
 			if (_field[i][j] == cell::o || _field[i][j] == cell::win_o)
 				if (_size % 2 == 0)
 					_sprite.setTextureRect(sf::IntRect(CELL_SIZE - 1, 0, CELL_SIZE, CELL_SIZE));
@@ -90,6 +78,8 @@ void Game::draw(sf::RenderWindow &window)
 			//
 			if (_field[i][j] == cell::x || _field[i][j] == cell::win_x)  _sprite.setTextureRect(sf::IntRect(0, 0, CELL_SIZE, CELL_SIZE));
 			
+
+			//painting cell into purple, if this is winning line
 			if (_field[i][j] == cell::win_x || _field[i][j] == cell::win_o)
 			{
 				_sprite.setColor(sf::Color(140, 102, 255));
@@ -98,6 +88,7 @@ void Game::draw(sf::RenderWindow &window)
 			{
 				_sprite.setColor(sf::Color::White);
 			}
+			//put in correct place
 			_sprite.setPosition(i * CELL_SIZE * x_scale, j * CELL_SIZE * y_scale);
 			window.draw(_sprite);
 		}	
@@ -114,6 +105,7 @@ void Game::reset()
 {
 	_playing = true;
 	_win_points = _size <= 3 ? _size : _size < 8 ? 3 : _size > 11 ? 5 : 4;
+	_turns = _size * _size;
 	_first_p_turn = true;
 	//scale's staff
 	x_scale = y_scale = (float) 640 / (_size * CELL_SIZE);
@@ -140,6 +132,6 @@ void Game::reset()
 			_field[i][j] = cell::empty;
 		}
 	}
-
+	//update prev size
 	_prev_size = _size;
 }

@@ -1,6 +1,6 @@
 #include "Player.h"
-#include <iostream>
 
+//size of cell in px
 #define CELL_SIZE 160
 
 Player::Player()
@@ -21,23 +21,31 @@ Player::~Player()
 
 bool Player::am_i_win( Game &game, size_t x, size_t y)
 {
-	
+	//where recolor is variable that show us painting this line or not
 	auto vertical_check = [&](bool recolor = false)
 	{
+		//start pos
 		size_t temp_x = x, temp_y = y;
 		size_t points = 1;
+		//painting start pos if we have to
 		if (recolor) game._field[temp_x][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
 
+		//go right
 		while (temp_x + 1 < game._size && game._field[temp_x + 1][temp_y] == this->_my_cell)
 		{
+			//painted
 			if (recolor) game._field[temp_x + 1][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
 			points++;
 			temp_x++;
 		}
+		//return start pos
 		temp_x = x;
 		temp_y = y;
+
+		//go left
 		while (temp_x != 0 && game._field[temp_x - 1][temp_y] == this->_my_cell)
 		{
+			//painted
 			if (recolor) game._field[temp_x - 1][temp_y] = (this->_my_cell == cell::o) ? cell::win_o : cell::win_x;
 			points++;
 			temp_x--;
@@ -152,8 +160,10 @@ bool Player::make_turn(Game &game, sf::Vector2f pos)
 	size_t x = pos.x / (CELL_SIZE * game.x_scale), y = pos.y / (CELL_SIZE * game.y_scale);
 	//check for empty cell
 	if (game._field[x][y] != cell::empty) return false;
-	//next pl turn
+	//next player turn
 	game._first_p_turn = !game._first_p_turn;
+	//one turn less
+	game._turns--;
 	//put
 	game._field[x][y] = this->_my_cell;
 	//am i win?

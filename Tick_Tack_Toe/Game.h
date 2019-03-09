@@ -18,11 +18,10 @@ public:
 	Game(size_t n = 8);
 	~Game();
 
+	//reset all game config to start
 	void reset();
 	//are we still playing?
 	bool playing();
-	//print to cmd
-	void print();
 	//drow with sfml
 	void draw(sf::RenderWindow &window);
 	//will first player go?
@@ -32,6 +31,7 @@ private:
 	cell** _field;
 	//width and height of the field
 	size_t _size;
+	//previos size
 	size_t _prev_size;
 	//are we still playing?
 	bool _playing;
@@ -39,7 +39,8 @@ private:
 	size_t _win_points;
 	//will first player go?
 	bool _first_p_turn;
-
+	//amount of possible turns
+	size_t _turns;
 	//scale's param
 	float x_scale;
 	float y_scale;

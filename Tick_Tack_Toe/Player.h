@@ -7,13 +7,12 @@
 class Player
 {
 public:
-	//friend class Game;
-
 	Player();
 	//are you a bot?
 	//cell that you would to play
 	Player(bool is_bot, cell my_cell);
 	~Player();
+	//turn of player
 	bool make_turn(Game &game, sf::Vector2f pos);
 private:
 	//check for win
