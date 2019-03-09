@@ -39,6 +39,7 @@ Message::Message()
 {
 	x_won = false;
 	o_won = false;
+	_is_message = false;
 	_about_o.set("owon.png", "tothemenu.png", 320,320);
 	//change "to the menu color"
 	_about_o._external_sprite.setColor(sf::Color(102, 255, 153));
