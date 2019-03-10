@@ -51,12 +51,12 @@ int main()
 		{
 			if (game.will_first_go() && p1.is_bot())
 			{
-				//std::cout << "AI's turn" << std::endl;
+				std::cout << "AI's turn" << std::endl;
 				if (p1.make_ai_turn(game)) msg.x_won = true;
 			}
 			else if (!game.will_first_go() && p2.is_bot())
 			{
-				//std::cout << "AI's turn" << std::endl;
+				std::cout << "AI's turn" << std::endl;
 				if (p2.make_ai_turn(game)) msg.o_won = true;
 			}
 		}
@@ -118,8 +118,6 @@ int main()
 			//if menu was opend we don't play anymore
 			msg.x_won = false;
 			msg.o_won = false;
-			p1.reset();
-			p2.reset();
 			//draw
 			menu.draw(window, game);
 

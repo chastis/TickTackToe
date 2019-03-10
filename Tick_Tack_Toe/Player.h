@@ -2,7 +2,6 @@
 #define PLAYER_H
 
 #include "Game.h"
-#include "Line.h"
 #include <SFML\Graphics.hpp>
 #include <vector>
 
@@ -22,7 +21,7 @@ public:
 	//are you a bot?
 	bool is_bot();
 	//reset to start;
-	void reset();
+	//void reset();
 
 private:
 	//check for win
@@ -31,11 +30,11 @@ private:
 	cell _my_cell;
 	//is this bot?
 	bool _is_bot;
-	//enemys line
-	std::vector<Line> defends;
-	//my line
-	std::vector<Line> attacks;
 	
 };
+
+std::vector<Attack>& give_attack(Game& game, cell my_cell);
+
+void upgrade_attack(Game& game, cell _my_cell, int x, int y);
 
 #endif // !PLAYER_H

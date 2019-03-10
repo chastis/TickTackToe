@@ -14,34 +14,6 @@ const bool operator ==(const Point &a, const Point &b)
 	if (a.x == b.x && a.y == b.y) return true; else return false;
 }
 
-void merge(std::vector<Line> &lines)
-{
-
-	for (int i = 0; i < lines.size(); i++)
-	{
-		for (int j = i + 1; j < lines.size(); j++)
-		{
-			if (lines[i].end == lines[j].start && lines[i].type == lines[j].type)
-			{
-				lines[i].end = lines[j].end;
-				lines[i].len += lines[j].len - 1;
-				lines.erase(lines.begin() + j);
-				i--;
-				break;
-			}
-			if (lines[i].start == lines[j].end && lines[i].type == lines[j].type)
-			{
-				lines[i].start = lines[j].start;
-				lines[i].len += lines[j].len - 1;
-				lines.erase(lines.begin() + j);
-				i--;
-				break;
-			}
-		}
-
-	}
-}
-
 Point::Point(int _x, int _y)
 {
 	x = _x;
@@ -103,13 +75,13 @@ Line::Line(int x1, int y1, int x2, int y2)
 
 void Line::print()
 {
-	std::cout << "(" << start.x << " " << start.y << ") (" << end.x << " " << end.y << ")" << std::endl;
+	std::cout << "(" << start.x << " " << start.y << ") (" << end.x << " " << end.y << ") ";
 }
 
 void Line::add_point(Point p)
 {
 	{
-		//horiontal line
+		//horizontal line
 		if (start.y == end.y)
 		{
 			if (start.x != 0 && start.y == p.y && p.x == start.x - 1)

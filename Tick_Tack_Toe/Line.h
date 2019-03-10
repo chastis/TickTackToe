@@ -33,6 +33,4 @@ const bool operator <(const Point &a, const Point &b);
 
 const bool operator ==(const Point &a, const Point &b);
 
-void merge(std::vector<Line> &lines);
-
 #endif // !LINE_H

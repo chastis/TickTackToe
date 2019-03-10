@@ -2,7 +2,7 @@
 #define GAME_H
 #include <SFML\Graphics.hpp>
 #include <vector>
-#include"Line.h"
+#include "Line.h"
 
 //content of cell in the field
 enum class cell
@@ -10,12 +10,14 @@ enum class cell
 	x, o, empty, win_x, win_o
 };
 
-
 class Game
 {
 public:
 	friend class Player;
 	friend class Menu;
+	friend class Attack;
+	friend std::vector<Attack>& give_attack(Game& game, cell my_cell);
+	friend void upgrade_attack(Game& game, cell _my_cell, int x, int y);
 	//n is size of the field
 	Game(size_t n = 8);
 	~Game();
@@ -53,8 +55,25 @@ private:
 	size_t _last_x;
 	size_t _last_y;
 	//attacks of players
-	std::vector<Line> _p1_attacks;
-	std::vector<Line> _p2_attacks;
+	std::vector<Attack> _p1_attacks;
+	std::vector<Attack> _p2_attacks;
 };
 
+
+class Attack
+{
+public:
+	friend class Player;
+	friend void upgrade_attack(Game& game, cell _my_cell, int x, int y);
+	friend void merge(std::vector<Attack> &lines);
+	Attack();
+	Attack(Game &game, int x1, int y1, int x2, int y2, cell my_cell);
+	void update(Game &game, cell my_cell);
+	void print();
+private:
+	Line line;
+	int potential;
+};
+
+void merge(std::vector<Attack> &lines);
 #endif // !GAME_H

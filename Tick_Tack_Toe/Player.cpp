@@ -5,6 +5,52 @@
 //size of cell in px
 #define CELL_SIZE 160
 
+std::vector<Attack>& give_attack(Game& game, cell my_cell)
+{
+	if (cell::x == my_cell) return game._p1_attacks;
+	else return game._p2_attacks;
+}
+
+void upgrade_attack(Game& game, cell _my_cell, int x, int y)
+{
+	Attack temp_attack(game, x, y, x, y,_my_cell);
+	Point temp_point(x, y), touch_point(-1, -1);
+	std::set<Point> used_points;
+	give_attack(game, _my_cell).push_back(temp_attack);
+	size_t size = give_attack(game, _my_cell).size();
+	for (int i = 0; i < size - 1; i++)
+	{
+		if (give_attack(game, _my_cell)[i].line.touch(temp_point, touch_point) && used_points.find(touch_point) == used_points.end())
+		{
+			used_points.insert(touch_point);
+			//std::cout << "touch_point = (" << touch_point.x << " " << touch_point.y << ")" << std::endl;
+			//std::cout << "i=" << i << std::endl;
+			if (give_attack(game, _my_cell)[i].line.len == 1)
+			{
+				give_attack(game, _my_cell).push_back(give_attack(game, _my_cell)[i]);
+			}
+			give_attack(game, _my_cell)[i].line.add_point(temp_point);
+		}
+
+	}
+	if (used_points.size() >= 2)
+	{
+		
+		std::cout << "attack before merge" << std::endl;
+		for (int i = 0; i < give_attack(game, _my_cell).size(); i++)
+		{
+			give_attack(game, _my_cell)[i].print();
+		}
+		merge(give_attack(game, _my_cell));
+	}
+	std::cout << "attack!" << std::endl;
+	for (int i = 0; i < give_attack(game, _my_cell).size(); i++)
+	{
+		give_attack(game, _my_cell)[i].update(game, _my_cell);
+		give_attack(game, _my_cell)[i].print();
+	}
+}
+
 Player::Player()
 {
 	_is_bot = 1;
@@ -174,42 +220,7 @@ bool Player::make_turn(Game &game, sf::Vector2f pos)
 	game._last_x = x;
 	game._last_y = y;
 	/////////////////////////////////////////////////////////////////////
-	Line temp_line(x, y, x, y);
-	Point temp_point(x, y), touch_point(-1,-1);
-	std::set<Point> used_points;
-	attacks.push_back(temp_line);
-	size_t size = attacks.size();
-	for (int i = 0; i < size - 1; i++)
-	{
-		if (attacks[i].touch(temp_point,touch_point) && used_points.find(touch_point) == used_points.end())
-		{
-			used_points.insert(touch_point);
-			std::cout << "touch_point = (" << touch_point.x << " " << touch_point.y << ")" << std::endl;
-			//error
-			std::cout << "i=" << i << std::endl;
-			if (attacks[i].len == 1)
-			{
-				attacks.push_back(attacks[i]);
-			}
-			//enderror
-			attacks[i].add_point(temp_point);
-		}
-	}
-
-	if (used_points.size() >= 2)
-	{
-		std::cout << "attack before merge" << std::endl;
-		for (int i = 0; i < attacks.size(); i++)
-		{
-			attacks[i].print();
-		}
-		merge(attacks);
-	}
-	std::cout << "attack!" << std::endl;
-	for (int i = 0; i < attacks.size(); i++)
-	{
-		attacks[i].print();
-	}
+	upgrade_attack(game, _my_cell, x, y);
 	/////////////////////////////////////////////////////////////////////
 	//am i win?
 	return am_i_win(game, x, y);
@@ -234,20 +245,15 @@ bool Player::make_ai_turn(Game &game)
 	{
 		game._field[x][y] = _my_cell;
 		//add this point like a attack
-		Line temp(x, y, x, y);
+		upgrade_attack(game, _my_cell, x, y);
 	}
-	else if (game._size == 2)
+	else if (game._field[x][y] != _my_cell)
 	{
-		x = y = 0;
-		while (game._field[x][y] != cell::empty)
-		{
-			if (x == 0) x++; else
-			{
-				y++;
-				x--;
-			}
-		}
+		x--;
+		y--;
 		game._field[x][y] = _my_cell;
+		//add this point like a attack
+		upgrade_attack(game, _my_cell, x, y);
 	}
 	else
 	{
@@ -271,10 +277,4 @@ bool Player::make_ai_turn(Game &game)
 	game._last_y = y;
 	//check win
 	return am_i_win(game, x, y);
-}
-
-void Player::reset()
-{
-	attacks.clear();
-	defends.clear();
 }

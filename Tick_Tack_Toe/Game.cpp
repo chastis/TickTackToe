@@ -1,7 +1,144 @@
 ﻿#include "Game.h"
+#include <iostream>
 
 //size of cell in px
 #define CELL_SIZE 160
+
+void merge(std::vector<Attack> &lines)
+{
+
+	for (int i = 0; i < lines.size(); i++)
+	{
+		for (int j = i + 1; j < lines.size(); j++)
+		{
+			if (lines[i].line.end == lines[j].line.start && lines[i].line.type == lines[j].line.type)
+			{
+				lines[i].line.end = lines[j].line.end;
+				lines[i].line.len += lines[j].line.len - 1;
+				lines.erase(lines.begin() + j);
+				i--;
+				break;
+			}
+			if (lines[i].line.start == lines[j].line.end && lines[i].line.type == lines[j].line.type)
+			{
+				lines[i].line.start = lines[j].line.start;
+				lines[i].line.len += lines[j].line.len - 1;
+				lines.erase(lines.begin() + j);
+				i--;
+				break;
+			}
+		}
+
+	}
+}
+
+Attack::Attack()
+{
+	line;
+	potential = -42;
+}
+
+Attack::Attack(Game& game, int x1, int y1, int x2, int y2, cell my_cell)
+{
+	{
+		Line temp(x1, y1, x2, y2);
+		line = temp;
+	}
+	potential = 8;
+	if (line.type == lines_type::point)
+	{
+		Point p(line.start.x, line.start.y);
+		if (p.x == 0 || game._field[p.x - 1][p.y] != cell::empty)
+			potential--;
+		if (p.x == game._size - 1 || game._field[p.x + 1][p.y] != cell::empty)
+			potential--;
+		if (p.y == 0 || game._field[p.x][p.y - 1] != cell::empty)
+			potential--;
+		if (p.y == game._size - 1 || game._field[p.x][p.y + 1] != cell::empty)
+			potential--;
+		if (p.x == 0 || p.y == 0 || game._field[p.x - 1][p.y - 1] != cell::empty)
+			potential--;
+		if (p.x == game._size - 1 || p.y == 0 || game._field[p.x + 1][p.y - 1] != cell::empty)
+			potential--;
+		if (p.x == 0 || p.y == game._size - 1 || game._field[p.x - 1][p.y + 1] != cell::empty)
+			potential--;
+		if (p.x == game._size - 1 || p.y == game._size - 1 || game._field[p.x + 1][p.y + 1] != cell::empty)
+			potential--;
+	}
+	else
+	{
+		//this cannot happen!!!
+		std::cout << "NANI1\n";
+	}
+}
+
+void Attack::update(Game &game, cell my_cell)
+{
+	potential = 2;
+	switch (line.type)
+	{
+	case lines_type::vertical: 
+	{
+		if (line.start.y == 0 || game._field[line.start.x][line.start.y - 1] != cell::empty)
+			potential--;
+		if (line.end.y == game._size - 1 || game._field[line.end.x][line.end.y + 1] != cell::empty)
+			potential--;
+		break;
+	}
+	case lines_type::horizontal:
+	{
+		if (line.start.x == 0 || game._field[line.start.x - 1][line.start.y] != cell::empty)
+			potential--;
+		if (line.end.x == game._size - 1 || game._field[line.end.x + 1][line.end.y] != cell::empty)
+			potential--;
+		break;
+	}
+	case lines_type::bot_left_top_right:
+	{
+		if (line.start.x == 0  || line.start.y == game._size - 1 || game._field[line.start.x - 1][line.start.y + 1] != cell::empty)
+			potential--;
+		if (line.end.x == game._size - 1 || line.end.y == 0 || game._field[line.end.x + 1][line.end.y - 1] != cell::empty)
+			potential--;
+		break;
+	}
+	case lines_type::bot_right_top_left:
+	{
+		if (line.start.x == 0 || line.start.y == 0 || game._field[line.start.x - 1][line.start.y - 1] != cell::empty)
+			potential--;
+		if (line.end.x == game._size - 1 || line.end.y == game._size - 1 || game._field[line.end.x + 1][line.end.y + 1] != cell::empty)
+			potential--;
+		break;
+	}
+	case lines_type::point:
+	{
+		potential = 8;
+		Point p(line.start.x, line.start.y);
+		if (p.x == 0 || game._field[p.x - 1][p.y] != cell::empty)
+			potential--;
+		if (p.x == game._size - 1 || game._field[p.x + 1][p.y] != cell::empty)
+			potential--;
+		if (p.y == 0 || game._field[p.x][p.y - 1] != cell::empty)
+			potential--;
+		if (p.y == game._size - 1 || game._field[p.x][p.y + 1] != cell::empty)
+			potential--;
+		if (p.x == 0 || p.y == 0 || game._field[p.x - 1][p.y - 1] != cell::empty)
+			potential--;
+		if (p.x == game._size - 1 || p.y == 0 || game._field[p.x + 1][p.y - 1] != cell::empty)
+			potential--;
+		if (p.x == 0 || p.y == game._size - 1 || game._field[p.x - 1][p.y + 1] != cell::empty)
+			potential--;
+		if (p.x == game._size - 1 || p.y == game._size - 1 || game._field[p.x + 1][p.y + 1] != cell::empty)
+			potential--;
+		break;
+	}
+	}
+}
+
+void Attack::print()
+{
+	line.print();
+	std::cout << " p: " << potential << " " << std::endl;
+}
 
 Game::Game(size_t n)
 {
@@ -118,6 +255,9 @@ void Game::reset()
 	//we don't have latest point
 	_last_x = 42;
 	_last_y = 42;
+	//reset players
+	_p1_attacks.clear();
+	_p2_attacks.clear();
 	//scale's staff
 	x_scale = y_scale = (float) 640 / (_size * CELL_SIZE);
 	_sprite.setScale(x_scale, y_scale);
