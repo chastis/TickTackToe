@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 #include <SFML\Graphics.hpp>
+#include <vector>
+#include"Line.h"
 
 //content of cell in the field
 enum class cell
@@ -50,6 +52,9 @@ private:
 	//the latest put point
 	size_t _last_x;
 	size_t _last_y;
+	//attacks of players
+	std::vector<Line> _p1_attacks;
+	std::vector<Line> _p2_attacks;
 };
 
 #endif // !GAME_H
