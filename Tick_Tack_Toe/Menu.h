@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "Game.h"
+#include "Player.h"
 
 class Buttons
 {
@@ -56,7 +57,7 @@ public:
 	void draw(sf::RenderWindow &window, Game &game);
 	//check buttons for pressed
 	//do all button's work
-	void work(sf::Vector2f pos, sf::RenderWindow &window, Game &game);
+	void work(sf::Vector2f pos, sf::RenderWindow &window, Game &game, Player &p1, Player &p2);
 	//reset to fisrt menu page
 	void reset();
 private:

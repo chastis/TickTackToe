@@ -1,5 +1,8 @@
+#include <time.h>
 #include "Menu.h"
 #include "Game.h"
+#include "Player.h"
+
 
 Buttons::Buttons()
 {
@@ -172,7 +175,7 @@ void Menu::reset()
 	_buttons[9]->_visible = true;
 }
 
-void Menu::work(sf::Vector2f pos, sf::RenderWindow &window, Game &game)
+void Menu::work(sf::Vector2f pos, sf::RenderWindow &window, Game &game, Player &p1, Player &p2)
 {
 	//button's functions
 	auto to_do = [&](int n)
@@ -207,7 +210,9 @@ void Menu::work(sf::Vector2f pos, sf::RenderWindow &window, Game &game)
 				_buttons[2]->_shine = true;
 				_buttons[3]->_shine = false;
 				_buttons[4]->_shine = false;
-				//todo
+				//change game settings
+				p1._is_bot = false;
+				p2._is_bot = false;
 				break;
 			}
 			//eve
@@ -216,7 +221,9 @@ void Menu::work(sf::Vector2f pos, sf::RenderWindow &window, Game &game)
 				_buttons[2]->_shine = false;
 				_buttons[3]->_shine = true;
 				_buttons[4]->_shine = false;
-				//todo
+				//change game settings
+				p1._is_bot = true;
+				p2._is_bot = true;
 				break;
 			}
 			//pve
@@ -225,7 +232,10 @@ void Menu::work(sf::Vector2f pos, sf::RenderWindow &window, Game &game)
 				_buttons[2]->_shine = false;
 				_buttons[3]->_shine = false;
 				_buttons[4]->_shine = true;
-				//todo
+				//change game settings
+				std::srand(std::time(0));
+				p1._is_bot = rand() % 2;
+				p2._is_bot = !p1.is_bot();
 				break;
 			}
 			//start

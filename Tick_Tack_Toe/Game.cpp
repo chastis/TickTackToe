@@ -7,6 +7,9 @@ Game::Game(size_t n)
 {
 	_playing = true;
 	_first_p_turn = true;
+	//we don't have latest point
+	_last_x = 42;
+	_last_y = 42;
 	//sfml staff
 	_texture.loadFromFile("images/xo6.png");
 	_sprite.setTexture(_texture);
@@ -84,7 +87,12 @@ void Game::draw(sf::RenderWindow &window)
 			{
 				_sprite.setColor(sf::Color(140, 102, 255));
 			}
-			else
+			//painting cell into yellow, if this latest put cell
+			else if (_last_x == i && _last_y == j)
+			{
+				_sprite.setColor(sf::Color(255, 255, 153));
+			}
+			else //return color back;
 			{
 				_sprite.setColor(sf::Color::White);
 			}
@@ -107,6 +115,9 @@ void Game::reset()
 	_win_points = _size <= 3 ? _size : _size < 8 ? 3 : _size > 11 ? 5 : 4;
 	_turns = _size * _size;
 	_first_p_turn = true;
+	//we don't have latest point
+	_last_x = 42;
+	_last_y = 42;
 	//scale's staff
 	x_scale = y_scale = (float) 640 / (_size * CELL_SIZE);
 	_sprite.setScale(x_scale, y_scale);

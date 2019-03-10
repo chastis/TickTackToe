@@ -1,4 +1,4 @@
-﻿#include <conio.h>
+﻿#include <iostream>
 #include <SFML\Graphics.hpp>
 #include "Game.h"
 #include "Player.h"
@@ -12,8 +12,8 @@ int main()
 	Game game;
 	Menu menu;
 	Message msg;
-	Player p1(1, cell::x);
-	Player p2(1, cell::o);
+	Player p1(0, cell::x);
+	Player p2(0, cell::o);
 	//who will make turn first?
 	bool first_p_turn = true;
 	//for only one time esc has been pressed
@@ -46,7 +46,21 @@ int main()
 			esc_pressed = false;
 		}
 
-		
+		//maybe is AI turn now?
+		if (game.playing() && !msg.is_message() && !menu.is_menu())
+		{
+			if (game.will_first_go() && p1.is_bot())
+			{
+				//std::cout << "AI's turn" << std::endl;
+				if (p1.make_ai_turn(game)) msg.x_won = true;
+			}
+			else if (!game.will_first_go() && p2.is_bot())
+			{
+				//std::cout << "AI's turn" << std::endl;
+				if (p2.make_ai_turn(game)) msg.o_won = true;
+			}
+		}
+
 		while (window.pollEvent(event))
 		{
 	
@@ -72,7 +86,7 @@ int main()
 				{
 					if (event.key.code == sf::Mouse::Left)
 					{
-						menu.work(pos, window, game);
+						menu.work(pos, window, game, p1, p2);
 					}
 				}
 
@@ -83,12 +97,14 @@ int main()
 				if (event.type == sf::Event::MouseButtonPressed)
 					if (event.key.code == sf::Mouse::Left)
 					{
-						if (game.will_first_go())
+						if (game.will_first_go() && !p1.is_bot())
 						{
+							//std::cout << "Player 1's turn" << std::endl;
 							if (p1.make_turn(game, pos)) msg.x_won = true;
 						}
-						else
+						else if (!p2.is_bot())
 						{
+							//std::cout << "Player 2's turn" << std::endl;
 							if (p2.make_turn(game, pos)) msg.o_won = true;
 						}
 					}
@@ -102,6 +118,8 @@ int main()
 			//if menu was opend we don't play anymore
 			msg.x_won = false;
 			msg.o_won = false;
+			p1.reset();
+			p2.reset();
 			//draw
 			menu.draw(window, game);
 

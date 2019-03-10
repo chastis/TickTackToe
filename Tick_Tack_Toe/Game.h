@@ -47,6 +47,9 @@ private:
 	//sfml staff
 	sf::Texture _texture;
 	sf::Sprite _sprite;
+	//the latest put point
+	size_t _last_x;
+	size_t _last_y;
 };
 
 #endif // !GAME_H
