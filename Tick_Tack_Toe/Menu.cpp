@@ -185,7 +185,9 @@ void Menu::work(sf::Vector2f pos, sf::RenderWindow &window, Game &game, Player &
 			//exit
 			case 0: 
 			{
+				//game.~Game();
 				window.close();
+				
 				break;
 			}
 			//newgame

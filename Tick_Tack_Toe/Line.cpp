@@ -75,7 +75,7 @@ Line::Line(int x1, int y1, int x2, int y2)
 
 void Line::print()
 {
-	std::cout << "(" << start.x << " " << start.y << ") (" << end.x << " " << end.y << ") ";
+	std::cout << "(" << start.x << " " << start.y << ") (" << end.x << " " << end.y << ")  len = " << len << " ";
 }
 
 void Line::add_point(Point p)

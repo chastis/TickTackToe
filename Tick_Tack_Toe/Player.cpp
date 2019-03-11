@@ -23,11 +23,10 @@ void upgrade_attack(Game& game, cell _my_cell, int x, int y)
 		if (give_attack(game, _my_cell)[i].line.touch(temp_point, touch_point) && used_points.find(touch_point) == used_points.end())
 		{
 			used_points.insert(touch_point);
-			//std::cout << "touch_point = (" << touch_point.x << " " << touch_point.y << ")" << std::endl;
-			//std::cout << "i=" << i << std::endl;
 			if (give_attack(game, _my_cell)[i].line.len == 1)
 			{
 				give_attack(game, _my_cell).push_back(give_attack(game, _my_cell)[i]);
+				give_attack(game, _my_cell)[give_attack(game, _my_cell).size() - 1].space = -42;
 			}
 			give_attack(game, _my_cell)[i].line.add_point(temp_point);
 		}
@@ -35,22 +34,65 @@ void upgrade_attack(Game& game, cell _my_cell, int x, int y)
 	}
 	if (used_points.size() >= 2)
 	{
-		
-		std::cout << "attack before merge" << std::endl;
-		for (int i = 0; i < give_attack(game, _my_cell).size(); i++)
-		{
-			give_attack(game, _my_cell)[i].print();
-		}
 		merge(give_attack(game, _my_cell));
 	}
-	std::cout << "attack!" << std::endl;
 	for (int i = 0; i < give_attack(game, _my_cell).size(); i++)
 	{
 		give_attack(game, _my_cell)[i].update(game, _my_cell);
-		give_attack(game, _my_cell)[i].print();
+		if (give_attack(game, _my_cell)[i].potential == 0)
+		{
+			//give_attack(game, _my_cell).erase(give_attack(game, _my_cell).begin() + i);
+			//i--;
+			continue;
+		}
 	}
 }
 
+void upgrade_attack(std::vector<Attack>& attacks, Game& game, cell _my_cell, int x, int y)
+{
+	Attack temp_attack(game, x, y, x, y, _my_cell);
+	Point temp_point(x, y), touch_point(-1, -1);
+	std::set<Point> used_points;
+	attacks.push_back(temp_attack);
+	size_t size = attacks.size();
+	for (int i = 0; i < size - 1; i++)
+	{
+		if (attacks[i].line.touch(temp_point, touch_point) && used_points.find(touch_point) == used_points.end())
+		{
+			used_points.insert(touch_point);
+			if (attacks[i].line.len == 1)
+			{
+				attacks.push_back(attacks[i]);
+				attacks[attacks.size() - 1].space = -42;
+			}
+			attacks[i].line.add_point(temp_point);
+		}
+
+	}
+	if (used_points.size() >= 2)
+	{
+		merge(attacks);
+	}
+	for (int i = 0; i < give_attack(game, _my_cell).size(); i++)
+	{
+		attacks[i].update(game, _my_cell);
+		if (attacks[i].potential == 0)
+		{
+			//attacks.erase(attacks.begin() + i);
+			//i--;
+			continue;
+		}
+	}
+}
+
+void set(std::vector<Attack>& here, std::vector<Attack>& from)
+{
+	here.clear();
+	for (auto now : from)
+	{
+		here.push_back(now);
+	}
+}
 Player::Player()
 {
 	_is_bot = 1;
@@ -243,35 +285,77 @@ bool Player::make_ai_turn(Game &game)
 	//for the first of all try to make turn in the center
 	if (game._field[x][y] == cell::empty)
 	{
-		game._field[x][y] = _my_cell;
-		//add this point like a attack
-		upgrade_attack(game, _my_cell, x, y);
+		//everything is OK
 	}
-	else if (game._field[x][y] != _my_cell)
+	else if (game._field[x][y] != _my_cell && game._field[x - 1][y - 1] == cell::empty)
 	{
 		x--;
 		y--;
-		game._field[x][y] = _my_cell;
-		//add this point like a attack
-		upgrade_attack(game, _my_cell, x, y);
 	}
 	else
 	{
+		bool we_win = false;
 		//AI itself
-		
+		int max_w = 0;
+		for (int i = 0; i < game._size && !we_win; i++)
+			for (int j = 0; j < game._size && !we_win; j++)
+				if (game._field[i][j] == cell::empty)
+				{
+					cell not_my_cell = _my_cell == cell::x ? cell::o : cell::x;
+					int temp_w_1 = 0;
+					int temp_w_2 = 0;
+					
+					if (amount_nearby_cell(game, i, j, not_my_cell) != 0)
+					{
+						std::vector<Attack> temp_2;
+						set(temp_2, give_attack(game, not_my_cell));
+						upgrade_attack(temp_2, game, not_my_cell, i, j);
+						temp_w_1 += count_weight(temp_2, i, j, game._win_points) - 1;
+						//todo
+					}
+					//if (amount_nearby_cell(game, i, j, _my_cell) != 0)
+					{
+						std::vector<Attack> temp;
+						set(temp, give_attack(game, _my_cell));
+						upgrade_attack(temp, game, _my_cell, i, j);
+						temp_w_2 += count_weight(temp, i, j, game._win_points);
+						//todo
+					}
+					if (temp_w_2 == 99999)
+					{
+						we_win = true;
+					}
+					if (temp_w_2 >= 5000 && temp_w_1 != 99999)
+					{
+						temp_w_2 *= 2;
+					}
+					//attack mod
+					//if (_my_cell == cell::x) temp_w_2 += temp_w_2 / 2;
+					if (temp_w_1 + temp_w_2 > max_w)
+					{
+						max_w = temp_w_1 + temp_w_2;
+						x = i;
+						y = j;
+					}
 
+				}
+				//else we cannot put cell in there
+		std::cout << "THE MOST THE MOST MAX WEIGHT: " << max_w << std::endl;
 	}
-
 
 
 	//time delay
 	sf::Clock clock;
 	sf::Time elapsed = clock.getElapsedTime();
-	sf::Time end_time = sf::seconds(2);
+	sf::Time end_time = sf::seconds(1);
 	while (elapsed < end_time)
 	{
 		elapsed = clock.getElapsedTime();
 	}
+	//put!
+	game._field[x][y] = _my_cell;
+	//add this point like a attack
+	upgrade_attack(game, _my_cell, x, y);
 	//put this point like the latest
 	game._last_x = x;
 	game._last_y = y;

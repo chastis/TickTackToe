@@ -20,9 +20,6 @@ public:
 	bool make_ai_turn(Game &game);
 	//are you a bot?
 	bool is_bot();
-	//reset to start;
-	//void reset();
-
 private:
 	//check for win
 	bool am_i_win(Game &game, size_t x, size_t y);
@@ -36,5 +33,9 @@ private:
 std::vector<Attack>& give_attack(Game& game, cell my_cell);
 
 void upgrade_attack(Game& game, cell _my_cell, int x, int y);
+
+void upgrade_attack(std::vector<Attack>& attacks, Game& game, cell _my_cell, int x, int y);
+
+void set(std::vector<Attack>& here, std::vector<Attack>& from);
 
 #endif // !PLAYER_H
