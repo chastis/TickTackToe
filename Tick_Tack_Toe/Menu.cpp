@@ -237,12 +237,23 @@ void Menu::work(sf::Vector2f pos, sf::RenderWindow &window, Game &game, Player &
 				//change game settings
 				std::srand(std::time(0));
 				p1._is_bot = rand() % 2;
+				//p1._is_bot = true;
 				p2._is_bot = !p1.is_bot();
+				
 				break;
 			}
 			//start
 			case 6:
 			{
+				//rerandom every time
+				if (_buttons[4]->is_shine())
+				{
+					//change game settings
+					std::srand(std::time(0));
+					p1._is_bot = rand() % 2;
+					//p1._is_bot = true;
+					p2._is_bot = !p1.is_bot();
+				}
 				game.reset();
 				this->close();
 				break;

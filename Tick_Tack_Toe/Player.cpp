@@ -11,43 +11,6 @@ std::vector<Attack>& give_attack(Game& game, cell my_cell)
 	else return game._p2_attacks;
 }
 
-void upgrade_attack(Game& game, cell _my_cell, int x, int y)
-{
-	Attack temp_attack(game, x, y, x, y,_my_cell);
-	Point temp_point(x, y), touch_point(-1, -1);
-	std::set<Point> used_points;
-	give_attack(game, _my_cell).push_back(temp_attack);
-	size_t size = give_attack(game, _my_cell).size();
-	for (int i = 0; i < size - 1; i++)
-	{
-		if (give_attack(game, _my_cell)[i].line.touch(temp_point, touch_point) && used_points.find(touch_point) == used_points.end())
-		{
-			used_points.insert(touch_point);
-			if (give_attack(game, _my_cell)[i].line.len == 1)
-			{
-				give_attack(game, _my_cell).push_back(give_attack(game, _my_cell)[i]);
-				give_attack(game, _my_cell)[give_attack(game, _my_cell).size() - 1].space = -42;
-			}
-			give_attack(game, _my_cell)[i].line.add_point(temp_point);
-		}
-
-	}
-	if (used_points.size() >= 2)
-	{
-		merge(give_attack(game, _my_cell));
-	}
-	for (int i = 0; i < give_attack(game, _my_cell).size(); i++)
-	{
-		give_attack(game, _my_cell)[i].update(game, _my_cell);
-		if (give_attack(game, _my_cell)[i].potential == 0)
-		{
-			//give_attack(game, _my_cell).erase(give_attack(game, _my_cell).begin() + i);
-			//i--;
-			continue;
-		}
-	}
-}
-
 void upgrade_attack(std::vector<Attack>& attacks, Game& game, cell _my_cell, int x, int y)
 {
 	Attack temp_attack(game, x, y, x, y, _my_cell);
@@ -76,12 +39,14 @@ void upgrade_attack(std::vector<Attack>& attacks, Game& game, cell _my_cell, int
 	for (int i = 0; i < give_attack(game, _my_cell).size(); i++)
 	{
 		attacks[i].update(game, _my_cell);
+		/*
 		if (attacks[i].potential == 0)
 		{
-			//attacks.erase(attacks.begin() + i);
-			//i--;
+			attacks.erase(attacks.begin() + i);
+			i--;
 			continue;
 		}
+		*/
 	}
 }
 
@@ -93,6 +58,7 @@ void set(std::vector<Attack>& here, std::vector<Attack>& from)
 		here.push_back(now);
 	}
 }
+
 Player::Player()
 {
 	_is_bot = 1;
@@ -261,9 +227,7 @@ bool Player::make_turn(Game &game, sf::Vector2f pos)
 	//put this point like the latest
 	game._last_x = x;
 	game._last_y = y;
-	/////////////////////////////////////////////////////////////////////
-	upgrade_attack(game, _my_cell, x, y);
-	/////////////////////////////////////////////////////////////////////
+	upgrade_attack(give_attack(game,_my_cell), game, _my_cell, x, y);
 	//am i win?
 	return am_i_win(game, x, y);
 }
@@ -305,7 +269,7 @@ bool Player::make_ai_turn(Game &game)
 					int temp_w_1 = 0;
 					int temp_w_2 = 0;
 					
-					if (amount_nearby_cell(game, i, j, not_my_cell) != 0)
+					//if (amount_nearby_cell(game, i, j, not_my_cell) != 0)
 					{
 						std::vector<Attack> temp_2;
 						set(temp_2, give_attack(game, not_my_cell));
@@ -321,16 +285,18 @@ bool Player::make_ai_turn(Game &game)
 						temp_w_2 += count_weight(temp, i, j, game._win_points);
 						//todo
 					}
+					//win condition
 					if (temp_w_2 == 99999)
 					{
 						we_win = true;
 					}
+					//very strong attack
 					if (temp_w_2 >= 5000 && temp_w_1 != 99999)
 					{
 						temp_w_2 *= 2;
 					}
 					//attack mod
-					//if (_my_cell == cell::x) temp_w_2 += temp_w_2 / 2;
+					if (_my_cell == cell::x) temp_w_2 += temp_w_2 / 2;
 					if (temp_w_1 + temp_w_2 > max_w)
 					{
 						max_w = temp_w_1 + temp_w_2;
@@ -355,7 +321,7 @@ bool Player::make_ai_turn(Game &game)
 	//put!
 	game._field[x][y] = _my_cell;
 	//add this point like a attack
-	upgrade_attack(game, _my_cell, x, y);
+	upgrade_attack(give_attack(game, _my_cell), game, _my_cell, x, y);
 	//put this point like the latest
 	game._last_x = x;
 	game._last_y = y;

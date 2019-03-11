@@ -57,6 +57,7 @@ int amount_nearby_cell(Game &game, int x, int y, cell this_cell)
 int count_weight(std::vector<Attack>& attacks, int x, int y, int win_points)
 {
 	int max_w = 0;
+	//fork like in chess
 	int count_of_fork = 0;
 	for (int i = 0; i < attacks.size(); i++)
 	{
@@ -64,6 +65,7 @@ int count_weight(std::vector<Attack>& attacks, int x, int y, int win_points)
 		int temp_w = 0;
 		if (attacks[i].is_content(x, y))
 		{
+			//variants of forks
 			if (attacks[i].potential == 2 && attacks[i].line.len == win_points - 2 || 
 				attacks[i].potential == 1 && attacks[i].line.len == win_points - 1 ||
 				attacks[i].space == 1 && attacks[i].line.len == win_points - 2 )
@@ -76,20 +78,15 @@ int count_weight(std::vector<Attack>& attacks, int x, int y, int win_points)
 			}
 			else
 			{
+				//max possible dangereos;
 				if (attacks[i].line.len == win_points)
 				{
 					temp_w = 99999;
 				}
-				else if (attacks[i].line.len == win_points - 1 && attacks[i].potential != 0)
+				//very dangereos;
+				else if (attacks[i].line.len == win_points - 1 && attacks[i].potential == 2)
 				{
-					if (attacks[i].potential == 2)
-					{
-						temp_w = 10000;
-					}
-					else
-					{
-						1000;
-					}
+					temp_w = 10000;
 				}
 				else
 				{
@@ -111,7 +108,6 @@ int count_weight(std::vector<Attack>& attacks, int x, int y, int win_points)
 
 Attack::Attack()
 {
-	line;
 	potential = -42;
 	space = -42;
 }
@@ -155,33 +151,36 @@ void Attack::update(Game &game, cell my_cell)
 {
 	potential = 2;
 	space = -42;
-	switch (line.type)
+
+	auto checking = [&](int &attack_place, int &temp_space, int &temp_x, int &temp_y)
 	{
-	case lines_type::vertical: 
+		if (game._field[temp_x][temp_y] == cell::empty)
+		{
+			attack_place++;
+			temp_space++;
+		}
+		else
+		{
+			if (game._field[temp_x][temp_y] == my_cell)
+				if (temp_space != 0 && (space <= 0 || temp_space < space))
+					space = temp_space;
+			return false;
+		}
+		return true;
+	};
+
+	auto vertical_search = [&](int &attack_place)
 	{
-		//check attack place
 		//start pos
 		int temp_x = line.start.x, temp_y = line.start.y;
-		//we already have some points
-		int attack_place = line.len;
+		
 		//space to next attack
 		int temp_space = 0;
 		//search
 		while (temp_y != 0)
 		{
 			temp_y--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
 		}
 		//start pos
 		temp_x = line.end.x; temp_y = line.end.y;
@@ -190,19 +189,88 @@ void Attack::update(Game &game, cell my_cell)
 		while (temp_y != game._size - 1)
 		{
 			temp_y++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
 		}
+	};
+
+	auto horizontal_search = [&](int &attack_place)
+	{
+		//start pos
+		int temp_x = line.start.x, temp_y = line.start.y;
+		//space to next attack
+		int temp_space = 0;
+		//search
+		while (temp_x != 0)
+		{
+			temp_x--;
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
+		}
+		//start pos
+		temp_space = 0;
+		temp_x = line.end.x; temp_y = line.end.y;
+		while (temp_x != game._size - 1)
+		{
+			temp_x++;
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
+		}
+	};
+
+	auto bot_left_top_right_search = [&](int &attack_place)
+	{
+		//start pos
+		int temp_x = line.start.x, temp_y = line.start.y;
+		//space to next attack
+		int temp_space = 0;
+		//search
+		while (temp_x != 0 && temp_y != game._size - 1)
+		{
+			temp_y++;
+			temp_x--;
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
+		}
+		//start pos
+		temp_space = 0;
+		temp_x = line.end.x; temp_y = line.end.y;
+		while (temp_x != game._size - 1 && temp_y != 0)
+		{
+			temp_y--;
+			temp_x++;
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
+		}
+	};
+
+	auto bot_right_top_left_search = [&](int &attack_place)
+	{
+		//start pos
+		int temp_x = line.start.x, temp_y = line.start.y;
+		//space to next attack
+		int temp_space = 0;
+		//search
+		while (temp_y != 0 && temp_x != 0)
+		{
+			temp_y--;
+			temp_x--;
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
+		}
+		//start pos
+		temp_space = 0;
+		temp_x = line.end.x; temp_y = line.end.y;
+		while (temp_y != game._size - 1 && temp_x != game._size - 1)
+		{
+			temp_y++;
+			temp_x++;
+			if (!checking(attack_place, temp_space, temp_x, temp_y)) break;
+		}
+	};
+
+	switch (line.type)
+	{
+	case lines_type::vertical: 
+	{
+		//check attack place
+		//we already have some points
+		int attack_place = line.len;
+		vertical_search(attack_place);
 		if (attack_place < game._win_points)
 		{
 			potential = 0;
@@ -218,48 +286,9 @@ void Attack::update(Game &game, cell my_cell)
 	case lines_type::horizontal:
 	{
 		//check attack place
-		//start pos
-		int temp_x = line.start.x, temp_y = line.start.y;
 		//we already have some points
 		int attack_place = line.len;
-		//space to next attack
-		int temp_space = 0;
-		//search
-		while (temp_x != 0)
-		{
-			temp_x--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		//start pos
-		temp_space = 0;
-		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_x != game._size - 1)
-		{
-			temp_x++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
+		horizontal_search(attack_place);
 		if (attack_place < game._win_points)
 		{
 			potential = 0;
@@ -275,50 +304,9 @@ void Attack::update(Game &game, cell my_cell)
 	case lines_type::bot_left_top_right:
 	{
 		//check attack place
-		//start pos
-		int temp_x = line.start.x, temp_y = line.start.y;
 		//we already have some points
 		int attack_place = line.len;
-		//space to next attack
-		int temp_space = 0;
-		//search
-		while (temp_x != 0 && temp_y != game._size - 1)
-		{
-			temp_y++;
-			temp_x--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		//start pos
-		temp_space = 0;
-		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_x != game._size - 1 && temp_y != 0)
-		{
-			temp_y--;
-			temp_x++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
+		bot_left_top_right_search(attack_place);
 		if (attack_place < game._win_points)
 		{
 			potential = 0;
@@ -334,50 +322,9 @@ void Attack::update(Game &game, cell my_cell)
 	case lines_type::bot_right_top_left:
 	{
 		//check attack place
-		//start pos
-		int temp_x = line.start.x, temp_y = line.start.y;
 		//we already have some points
 		int attack_place = line.len;
-		//space to next attack
-		int temp_space = 0;
-		//search
-		while (temp_y != 0 && temp_x != 0)
-		{
-			temp_y--;
-			temp_x--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		//start pos
-		temp_space = 0;
-		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_y != game._size - 1 && temp_x != game._size - 1)
-		{
-			temp_y++;
-			temp_x++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				attack_place++;
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
+		bot_right_top_left_search(attack_place);
 		if (attack_place < game._win_points)
 		{
 			potential = 0;
@@ -414,159 +361,23 @@ void Attack::update(Game &game, cell my_cell)
 		int temp_space = 0;
 		//start pos
 		int temp_x = line.start.x, temp_y = line.start.y;
+		//
+		int attack_place = line.len;
 		///search vertical
-		while (temp_y != 0)
-		{
-			temp_y--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		//start pos
-		temp_x = line.end.x; temp_y = line.end.y;
-		temp_space = 0;
-		while (temp_y != game._size - 1)
-		{
-			temp_y++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		
-
+		vertical_search(attack_place);
 		///search horizontal
 		//start pos
 		temp_space = 0;
 		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_x != 0)
-		{
-			temp_x--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		//start pos
-		temp_space = 0;
-		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_x != game._size - 1)
-		{
-			temp_x++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-
+		horizontal_search(attack_place);
 		///search from bottom left to top right
 		//start pos
-		temp_space = 0;
-		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_x != 0 && temp_y != game._size - 1)
-		{
-			temp_y++;
-			temp_x--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		//start pos
-		temp_space = 0;
-		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_x != game._size - 1 && temp_y != 0)
-		{
-			temp_y--;
-			temp_x++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-
+		bot_left_top_right_search(attack_place);
 		///search from bottom right to top left
 		//start pos
 		temp_space = 0;
 		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_y != 0 && temp_x != 0)
-		{
-			temp_y--;
-			temp_x--;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
-		//start pos
-		temp_space = 0;
-		temp_x = line.end.x; temp_y = line.end.y;
-		while (temp_y != game._size - 1 && temp_x != game._size - 1)
-		{
-			temp_y++;
-			temp_x++;
-			if (game._field[temp_x][temp_y] == cell::empty)
-			{
-				temp_space++;
-			}
-			else
-			{
-				if (game._field[temp_x][temp_y] == my_cell)
-					if (temp_space != 0 && (space <= 0 || temp_space < space))
-						space = temp_space;
-				break;
-			}
-		}
+		bot_right_top_left_search(attack_place);
 		break;
 	}
 	}

@@ -32,8 +32,6 @@ private:
 
 std::vector<Attack>& give_attack(Game& game, cell my_cell);
 
-void upgrade_attack(Game& game, cell _my_cell, int x, int y);
-
 void upgrade_attack(std::vector<Attack>& attacks, Game& game, cell _my_cell, int x, int y);
 
 void set(std::vector<Attack>& here, std::vector<Attack>& from);

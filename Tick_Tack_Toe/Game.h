@@ -17,7 +17,6 @@ public:
 	friend class Menu;
 	friend class Attack;
 	friend std::vector<Attack>& give_attack(Game& game, cell my_cell);
-	friend void upgrade_attack(Game& game, cell _my_cell, int x, int y);
 	friend int amount_nearby_cell(Game &game, int x, int y, cell this_cell);
 	//n is size of the field
 	Game(size_t n = 8);
@@ -65,7 +64,6 @@ class Attack
 {
 public:
 	friend class Player;
-	friend void upgrade_attack(Game& game, cell _my_cell, int x, int y);
 	friend void upgrade_attack(std::vector<Attack>& attacks, Game& game, cell _my_cell, int x, int y);
 	friend void merge(std::vector<Attack> &lines);
 	friend int count_weight(std::vector<Attack>& attacks, int x, int y, int win_points);
@@ -87,4 +85,5 @@ void merge(std::vector<Attack> &lines);
 int amount_nearby_cell(Game &game, int x, int y, cell this_cell);
 
 int count_weight(std::vector<Attack>& attacks, int x, int y, int win_points);
+
 #endif // !GAME_H

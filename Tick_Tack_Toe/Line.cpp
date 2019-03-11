@@ -14,16 +14,12 @@ const bool operator ==(const Point &a, const Point &b)
 	if (a.x == b.x && a.y == b.y) return true; else return false;
 }
 
-Point::Point(int _x, int _y)
+Point::Point(int _x, int _y) : x(_x), y(_y)
 {
-	x = _x;
-	y = _y;
 }
 
 Line::Line()
 {
-	start;
-	end;
 	len = 0;
 	type = lines_type::point;
 }
