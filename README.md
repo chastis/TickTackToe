@@ -1,2 +1,3 @@
 # Tick_Tack_Toe
-the tick-tack-toe game
+
+The tick-tack-toe game were writed on C++ with SFML
